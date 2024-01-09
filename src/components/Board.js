@@ -7,7 +7,7 @@ export default function Board(props) {
 
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
-            row.push(<Square id = {8*i + j + 1} bgcolor = {((i + j) % 2 == 0)? "brown" : "red" }/>);
+            row.push(<Square id = {8*i + j + 1} bgcolor = {((i + j) % 2 == 0)? "#B58863" : "#F0D9B5" }/>);
         }
         squares.push(<div>{row}</div>);
         row = [];

@@ -4,7 +4,11 @@ export default function Square(props) {
     let id = props.id;
 
     return (
-        <button className="square" style={{backgroundColor: props.bgcolor,  height: '100px', width: '100px'}}>
+        <button className="square" style={{backgroundColor: props.bgcolor,  
+        height: '100px', 
+        width: '100px', 
+        outline: 'none', 
+        border: 'none'}}>
             {id}
         </button>
     );
