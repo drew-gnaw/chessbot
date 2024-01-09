@@ -10,6 +10,7 @@ export default function Square(props) {
         width: '64px', 
         outline: 'none', 
         border: 'none'}}>
+            {(props.piece == null ? <div></div> :
             <img src={props.piece} alt="" style={{
             position: 'relative',
             top: '50%',
@@ -17,7 +18,9 @@ export default function Square(props) {
             transform: 'translate(-50%, -50%)',
             height: '58px',
             width: '58px',
-            }}/>
+            border: '0',
+            outline: '0'
+            }}/>)}
         </button>
     );
 }
