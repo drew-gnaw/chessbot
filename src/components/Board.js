@@ -48,13 +48,25 @@ export default function Board(props) {
     //     }
     // }
 
+    // if white is true, returns true IFF the square at id contains a white piece. if white is false, checks for black piece.
+    const containsColorPiece = (id, white) => {
+        return false;
+    }
+
     const squareClicked = (id) => {
         setSelectedSquare(prevSelectedSquare => {
             console.log("prev selected: " + prevSelectedSquare);
+
+            // if no square is selected, we select the square
             if (prevSelectedSquare === 0) {
                 return id;
+
+            // if we select the selected square, deselect
             } else if (prevSelectedSquare === id) {
                 return 0;
+
+            } else if (containsColorPiece(id, true)) {
+
             } else {
                 performMove(prevSelectedSquare, id);
                 return 0;
@@ -64,6 +76,7 @@ export default function Board(props) {
 
     const performMove = (sourceid, targetid) => {
         console.log("move from " + sourceid + " to " + targetid);
+        // HERE
     }
 
     const startingBoardStateStrings = ["r", "n", "b", "q", "k", "b", "n", "r",
@@ -93,12 +106,25 @@ export default function Board(props) {
         }
     }
 
-    const [boardState, setBoardState] = useState(startingBoardState);
+    const [boardState, setBoardState] = useState(startingBoardStateStrings);
 
     console.log("new selected: " + selectedSquare);
     return (
         <div>
-            <div>{boardState}</div>
+            {boardState.slice(0, 64).map((_, i) => (
+                <div key={i} style={{display: 'flex'}}>
+                    {boardState.slice(i*8, i*8+8).map((piece, j) => (
+                       <Square id = {j + 1 + i*8} 
+                           bgcolor = {((j + i) % 2 !== 0)? "#B58863" : "#F0D9B5" } 
+                           selectedcolor = {((j + i) % 2 !== 0)? "#DAC431" : "#F8EC5A" } 
+                           dark = {((j + i) % 2 !== 0)}
+                           piece = {strToPng(piece)}
+                           handleClick = {squareClicked}
+                           selected = {(id) => {return id === selectedSquare}}
+                           key = {(j + 1 + i*8) + " square"}/>
+                    ))}
+                </div>
+            ))}
         </div>
-    );
+      );
 }
