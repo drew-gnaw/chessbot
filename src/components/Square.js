@@ -1,15 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 
 export default function Square(props) {
-    let id = props.id;
-    const [selected, setSelected] = useState(false);
-
+    const id = props.id;
     return (
         <button className="square" 
-        onClick = {() => {props.handleClick(id);
-                        setSelected(true)}}
+        onClick = {() => props.handleClick(id)}
         style={{
-        backgroundColor: (selected ? props.selectedcolor : props.bgcolor),  
+        backgroundColor: (props.selected(id) ? props.selectedcolor : props.bgcolor),  
         height: '64px', 
         width: '64px', 
         outline: 'none', 
