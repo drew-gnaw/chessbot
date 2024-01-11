@@ -34,41 +34,51 @@ export default function Board(props) {
     };
 
     const [selectedSquare, setSelectedSquare] = useState(0); // 0 for none selected, otherwise 1-64 for id
+    const [validSelection, setValidSelection] = useState(false); // true if a piece of the player's color is selected
     
     const strToPng = (s) => {
         return pngMap[s];
     }
 
-    // function squareClicked(id) {
-    //     console.log("hai " + selectedSquare);
-    //     if (selectedSquare === 0) {
-    //         setSelectedSquare(id);
-    //     } else if (selectedSquare === id) {
-    //         setSelectedSquare(0);
-    //     }
-    // }
+    // checks the case of the given char.
+    const checkCase = (char) => {
+        const code = char.charCodeAt(0);
+        if (code >= 65 && code <= 90) {
+            return 'Uppercase';
+        } else if (code >= 97 && code <= 122) {
+            return 'Lowercase';
+        } else {
+            return 'Neither';
+        }
+    }
 
     // if white is true, returns true IFF the square at id contains a white piece. if white is false, checks for black piece.
     const containsColorPiece = (id, white) => {
-        return false;
+        if (white) {
+            return (checkCase(boardState[id - 1]) === 'Uppercase');
+        } else {
+            return (checkCase(boardState[id - 1]) === 'Lowercase');
+        }
     }
 
     const squareClicked = (id) => {
         setSelectedSquare(prevSelectedSquare => {
             console.log("prev selected: " + prevSelectedSquare);
 
-            // if no square is selected, we select the square
-            if (prevSelectedSquare === 0) {
+            // if we select the selected square, deselect
+            if (prevSelectedSquare === id) {
+                setValidSelection(false);
+                return 0;
+            
+            // if we select a white piece, we can get ready for a move
+            } else if (containsColorPiece(id, true)) {
+                console.log("clicked on white piece");
+                setValidSelection(true);
                 return id;
 
-            // if we select the selected square, deselect
-            } else if (prevSelectedSquare === id) {
-                return 0;
-
-            } else if (containsColorPiece(id, true)) {
-
+            
             } else {
-                performMove(prevSelectedSquare, id);
+                setValidSelection(false);
                 return 0;
             }
         });
