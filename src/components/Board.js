@@ -48,7 +48,7 @@ export default function Board(props) {
     //     }
     // }
 
-    function squareClicked(id) {
+    const squareClicked = (id) => {
         setSelectedSquare(prevSelectedSquare => {
             console.log("prev selected: " + prevSelectedSquare);
             if (prevSelectedSquare === 0) {
@@ -56,9 +56,14 @@ export default function Board(props) {
             } else if (prevSelectedSquare === id) {
                 return 0;
             } else {
-                return id;
+                performMove(prevSelectedSquare, id);
+                return 0;
             }
         });
+    }
+
+    const performMove = (sourceid, targetid) => {
+        console.log("move from " + sourceid + " to " + targetid);
     }
 
     const startingBoardStateStrings = ["r", "n", "b", "q", "k", "b", "n", "r",
