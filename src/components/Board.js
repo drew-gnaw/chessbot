@@ -13,8 +13,6 @@ import npng from "../assets/Bn.png"
 import rpng from "../assets/Br.png"
 import ppng from "../assets/Bp.png"
 import transparent from "../assets/transparent.png"
-import { set } from "lodash";
-//const lodash = require('lodash');
 
 export default function Board(props) {
     const pngMap = {
@@ -71,6 +69,11 @@ export default function Board(props) {
         } else {
             return (checkCase(boardState[id - 1]) === 'Lowercase');
         }
+    }
+
+    // returns true if the square is light
+    const isLightSquare = (id) => {
+        return ((Math.floor((id - 1) / 8)) + (id % 8)) % 2 !== 0;
     }
 
     // returns the ids of squares that are valid pawn moves from the given id.
@@ -133,7 +136,48 @@ export default function Board(props) {
         
     }
 
-    
+    const getBishopMoves = (id, white) => {
+        let bmoves = [-9, -7, 7, 9]
+        let moves = [];
+        for (let i = 0; i < bmoves.length; i++) {
+            let hitPiece = false;
+            let dist = 0;
+            while (!hitPiece) {
+                dist++;
+                const target = id + dist * bmoves[i];
+                if (target < 1 || target > 64 || (isLightSquare(target) !== isLightSquare(id))) {
+                    break;
+                }
+                if (containsColorPiece(target, white) || containsColorPiece(target, !white)) {
+                    if (containsColorPiece(target, !white)) {
+                        moves.push(target);
+                    }
+                    hitPiece = true;
+                } else {
+                    moves.push(target);
+                }
+            }
+        }
+        return moves;
+    }
+
+    const getQueenMoves = (id, white) => {
+        return getRookMoves(id, white).concat(getBishopMoves(id, white));
+    }
+
+    const getKingMoves = (id, white) => {
+        const kmoves = [-9, -8, -7, -1, 1, 7, 8, 9];
+        let moves = [];
+        for (let i = 0; i < kmoves.length; i++) {
+            const target = id + kmoves[i];
+            const didntCross = Math.abs((((id % 8) === 0) ? 8 : (id % 8)) - (((target % 8) === 0) ? 8 : (target % 8))) <= 1;
+            if (target > 0 && target <= 64 && !containsColorPiece(target, white) && didntCross) {
+                moves.push(target);
+            }
+        }
+        return moves;
+        
+    }
 
     // returns the ids of squares that a piece on id of given color could move to.
     const getMoves = (piece, id, white) => {
@@ -144,6 +188,12 @@ export default function Board(props) {
                 return getRookMoves(id, white);
             case 'n':
                 return getKnightMoves(id, white);
+            case 'b':
+                return getBishopMoves(id, white);
+            case 'q':
+                return getQueenMoves(id, white);
+            case 'k':
+                return getKingMoves(id, white);
             default:
                 return [];
         }
