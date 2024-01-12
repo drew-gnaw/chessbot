@@ -35,6 +35,7 @@ export default function Board(props) {
 
     const [selectedSquare, setSelectedSquare] = useState(0); // 0 for none selected, otherwise 1-64 for id
     const [validSelection, setValidSelection] = useState(false); // true if a piece of the player's color is selected
+    const [moved, setMoved] = useState(false);
     
     const strToPng = (s) => {
         return pngMap[s];
@@ -63,30 +64,39 @@ export default function Board(props) {
 
     const squareClicked = (id) => {
         setSelectedSquare(prevSelectedSquare => {
-            console.log("prev selected: " + prevSelectedSquare);
 
             // if we select the selected square, deselect
             if (prevSelectedSquare === id) {
+                console.log('1');
                 setValidSelection(false);
                 return 0;
             
             // if we select a white piece, we can get ready for a move
             } else if (containsColorPiece(id, true)) {
-                console.log("clicked on white piece");
+                console.log('2');
                 setValidSelection(true);
                 return id;
 
-            
             } else {
-                setValidSelection(false);
+                console.log('3');
+                if (validSelection) {
+                    console.log('4');
+                    performMove(prevSelectedSquare, id);
+                    setValidSelection(false);
+                }
                 return 0;
             }
         });
+        setMoved(false);
     }
 
     const performMove = (sourceid, targetid) => {
         console.log("move from " + sourceid + " to " + targetid);
-        // HERE
+        boardState[targetid - 1] = boardState[sourceid - 1];
+        boardState[sourceid - 1] = " ";
+        setMoved(true);
+        setValidSelection(false);
+        console.log("selected: " + selectedSquare);
     }
 
     const startingBoardStateStrings = ["r", "n", "b", "q", "k", "b", "n", "r",
@@ -97,28 +107,9 @@ export default function Board(props) {
                                        " ", " ", " ", " ", " ", " ", " ", " ",
                                        "P", "P", "P", "P", "P", "P", "P", "P",
                                        "R", "N", "B", "Q", "K", "B", "N", "R"];
-    let startingBoardState = [];
-
-    
-    for (let i = 0; i < 64; i++) {
-        let rownum = Math.floor(i/8);
-        row.push(<Square id = {i + 1} 
-            bgcolor = {((i + rownum) % 2 !== 0)? "#B58863" : "#F0D9B5" } 
-            selectedcolor = {((i + rownum) % 2 !== 0)? "#DAC431" : "#F8EC5A" } 
-            dark = {((i + rownum) % 2 !== 0)}
-            piece = {strToPng(startingBoardStateStrings[i])}
-            handleClick = {squareClicked}
-            selected = {(id) => {return id === selectedSquare}}
-            key = {(i + 1) + " square"}/>);
-        if (row.length === 8) {
-            startingBoardState.push(<div key = {i + " row"} style={{display: 'flex'}}>{row}</div>);
-            row = [];
-        }
-    }
 
     const [boardState, setBoardState] = useState(startingBoardStateStrings);
 
-    console.log("new selected: " + selectedSquare);
     return (
         <div>
             {boardState.slice(0, 64).map((_, i) => (
@@ -130,7 +121,7 @@ export default function Board(props) {
                            dark = {((j + i) % 2 !== 0)}
                            piece = {strToPng(piece)}
                            handleClick = {squareClicked}
-                           selected = {(id) => {return id === selectedSquare}}
+                           selected = {(id) => {return id === selectedSquare && !moved}}
                            key = {(j + 1 + i*8) + " square"}/>
                     ))}
                 </div>
