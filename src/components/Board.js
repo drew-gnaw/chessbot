@@ -145,7 +145,7 @@ export default function Board(props) {
             case 'n':
                 return getKnightMoves(id, white);
             default:
-                return [4, 6];
+                return [];
         }
     }
 
