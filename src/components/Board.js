@@ -95,9 +95,27 @@ export default function Board(props) {
     const getRookMoves = (id, white) => {
         let rmoves = [-8, -1, 1, 8]
         let moves = [];
+        const originalRank = Math.floor((id - 1) / 8);
         for (let i = 0; i < rmoves.length; i++) {
-
+            let hitPiece = false;
+            let dist = 0;
+            while (!hitPiece) {
+                dist++;
+                const target = id + dist * rmoves[i];
+                if (target < 1 || target > 64 || (Math.abs(rmoves[i]) === 1 ? Math.floor((target - 1) / 8) !== originalRank : false)) {
+                    break;
+                }
+                if (containsColorPiece(target, white) || containsColorPiece(target, !white)) {
+                    if (containsColorPiece(target, !white)) {
+                        moves.push(target);
+                    }
+                    hitPiece = true;
+                } else {
+                    moves.push(target);
+                }
+            }
         }
+        return moves;
     }
 
 
@@ -122,6 +140,8 @@ export default function Board(props) {
         switch (piece) {
             case 'p':
                 return getPawnMoves(id, white);
+            case 'r':
+                return getRookMoves(id, white);
             case 'n':
                 return getKnightMoves(id, white);
             default:
