@@ -6,7 +6,7 @@ export default function Square(props) {
         <button className="square" 
         onClick = {() => props.handleClick(id)}
         style={{
-        backgroundColor: (props.selected(id) ? props.selectedcolor : props.bgcolor),  
+        backgroundColor: (props.highlighted(id) ? props.highlightedcolor : props.bgcolor),  
         height: '64px', 
         width: '64px', 
         outline: 'none', 

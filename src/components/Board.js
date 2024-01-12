@@ -13,10 +13,10 @@ import npng from "../assets/Bn.png"
 import rpng from "../assets/Br.png"
 import ppng from "../assets/Bp.png"
 import transparent from "../assets/transparent.png"
+import { set } from "lodash";
 //const lodash = require('lodash');
 
 export default function Board(props) {
-    let row = [];
     const pngMap = {
         "K": Kpng,
         "Q": Qpng,
@@ -33,7 +33,18 @@ export default function Board(props) {
         " ": transparent
     };
 
+    const startingBoardStateStrings = ["r", "n", "b", "q", "k", "b", "n", "r",
+                                       "p", "p", "p", "p", "p", "p", "p", "p",
+                                       " ", " ", " ", " ", " ", " ", " ", " ",
+                                       " ", " ", " ", " ", " ", " ", " ", " ",
+                                       " ", " ", " ", " ", " ", " ", " ", " ",
+                                       " ", " ", " ", " ", " ", " ", " ", " ",
+                                       "P", "P", "P", "P", "P", "P", "P", "P",
+                                       "R", "N", "B", "Q", "K", "B", "N", "R"];
+
+    const [boardState, setBoardState] = useState(startingBoardStateStrings);
     const [selectedSquare, setSelectedSquare] = useState(0); // 0 for none selected, otherwise 1-64 for id
+    const [highlightedSquares, setHighlightedSquares] = useState([]); // contains all highlighted (moveable to) squares
     const [validSelection, setValidSelection] = useState(false); // true if a piece of the player's color is selected
     const [moved, setMoved] = useState(false);
     
@@ -62,28 +73,84 @@ export default function Board(props) {
         }
     }
 
+    // returns the ids of squares that are valid pawn moves from the given id.
+    const getPawnMoves = (id, white) => {
+        let moves = [];
+        if (white) {
+            if (id - 8 > 0 && !containsColorPiece(id - 8, true) && !containsColorPiece(id - 8, false)) {
+                moves.push(id - 8);
+            }
+            if ((id % 8 !== 1) && containsColorPiece(id - 9, false)) {
+                moves.push(id - 9);
+            }
+            if ((id % 8 !== 0) && containsColorPiece(id - 7, false)) {
+                moves.push(id - 7);
+            }
+        } else {
+            // blacks moves go here
+        }
+        return moves;
+    }
+
+    const getRookMoves = (id, white) => {
+        let rmoves = [-8, -1, 1, 8]
+        let moves = [];
+        for (let i = 0; i < rmoves.length; i++) {
+
+        }
+    }
+
+
+    const getKnightMoves = (id, white) => {
+        const knmoves = [-17, -15, -10, -6, 6, 10, 15, 17];
+        let moves = [];
+        for (let i = 0; i < knmoves.length; i++) {
+            const target = id + knmoves[i];
+            const didntCross = Math.abs((((id % 8) === 0) ? 8 : (id % 8)) - (((target % 8) === 0) ? 8 : (target % 8))) <= 2;
+            if (target > 0 && target <= 64 && !containsColorPiece(target, white) && didntCross) {
+                moves.push(target);
+            }
+        }
+        return moves;
+        
+    }
+
+    
+
+    // returns the ids of squares that a piece on id of given color could move to.
+    const getMoves = (piece, id, white) => {
+        switch (piece) {
+            case 'p':
+                return getPawnMoves(id, white);
+            case 'n':
+                return getKnightMoves(id, white);
+            default:
+                return [4, 6];
+        }
+    }
+
     const squareClicked = (id) => {
         setSelectedSquare(prevSelectedSquare => {
 
             // if we select the selected square, deselect
             if (prevSelectedSquare === id) {
-                console.log('1');
                 setValidSelection(false);
+                setHighlightedSquares([]);
                 return 0;
             
             // if we select a white piece, we can get ready for a move
             } else if (containsColorPiece(id, true)) {
-                console.log('2');
                 setValidSelection(true);
+                console.log(boardState[id - 1].toString().toLowerCase());
+                setHighlightedSquares(getMoves(boardState[id - 1].toString().toLowerCase(), id, true));
                 return id;
 
             } else {
-                console.log('3');
-                if (validSelection) {
-                    console.log('4');
+                if (validSelection && highlightedSquares.includes(id)) {
                     performMove(prevSelectedSquare, id);
                     setValidSelection(false);
                 }
+                setHighlightedSquares([]);
                 return 0;
             }
         });
@@ -91,24 +158,15 @@ export default function Board(props) {
     }
 
     const performMove = (sourceid, targetid) => {
-        console.log("move from " + sourceid + " to " + targetid);
-        boardState[targetid - 1] = boardState[sourceid - 1];
-        boardState[sourceid - 1] = " ";
+        setBoardState(prevBoardState => {
+            const newBoardState = [...prevBoardState];
+            newBoardState[targetid - 1] = newBoardState[sourceid - 1];
+            newBoardState[sourceid - 1] = " ";
+            return newBoardState;
+        });
         setMoved(true);
         setValidSelection(false);
-        console.log("selected: " + selectedSquare);
     }
-
-    const startingBoardStateStrings = ["r", "n", "b", "q", "k", "b", "n", "r",
-                                       "p", "p", "p", "p", "p", "p", "p", "p",
-                                       " ", " ", " ", " ", " ", " ", " ", " ",
-                                       " ", " ", " ", " ", " ", " ", " ", " ",
-                                       " ", " ", " ", " ", " ", " ", " ", " ",
-                                       " ", " ", " ", " ", " ", " ", " ", " ",
-                                       "P", "P", "P", "P", "P", "P", "P", "P",
-                                       "R", "N", "B", "Q", "K", "B", "N", "R"];
-
-    const [boardState, setBoardState] = useState(startingBoardStateStrings);
 
     return (
         <div>
@@ -117,11 +175,11 @@ export default function Board(props) {
                     {boardState.slice(i*8, i*8+8).map((piece, j) => (
                        <Square id = {j + 1 + i*8} 
                            bgcolor = {((j + i) % 2 !== 0)? "#B58863" : "#F0D9B5" } 
-                           selectedcolor = {((j + i) % 2 !== 0)? "#DAC431" : "#F8EC5A" } 
+                           highlightedcolor = {((j + i) % 2 !== 0)? "#DAC431" : "#F8EC5A" } 
                            dark = {((j + i) % 2 !== 0)}
                            piece = {strToPng(piece)}
                            handleClick = {squareClicked}
-                           selected = {(id) => {return id === selectedSquare && !moved}}
+                           highlighted = {(id) => {return (id === selectedSquare || highlightedSquares.includes(id)) && !moved}}
                            key = {(j + 1 + i*8) + " square"}/>
                     ))}
                 </div>
