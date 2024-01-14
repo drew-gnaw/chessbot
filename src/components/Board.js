@@ -232,7 +232,6 @@ export default function Board(props) {
             for (let i = 1; i <= 64; i++) {
                 if (containsColorPiece(i, false) && !checkedPieces.includes(i)) blkSquares.push(i);
             }
-            console.log(blkSquares);
             let origin = blkSquares[Math.floor(Math.random() * blkSquares.length)];
             let piece = boardState[origin - 1];
             let moves = getMoves(piece, origin, false);
