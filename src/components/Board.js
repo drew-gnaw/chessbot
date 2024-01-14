@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Square from "./Square";
 import Kpng from "../assets/K.png"
 import Qpng from "../assets/Q.png"
@@ -45,6 +45,13 @@ export default function Board(props) {
     const [highlightedSquares, setHighlightedSquares] = useState([]); // contains all highlighted (moveable to) squares
     const [validSelection, setValidSelection] = useState(false); // true if a piece of the player's color is selected
     const [moved, setMoved] = useState(false);
+
+    useEffect(() => {
+        if (moved) {
+            makeBlackMove();
+            setMoved(false);
+        }
+    }, [boardState]); // Only re-run if 'state' changes
     
     const strToPng = (s) => {
         return pngMap[s];
@@ -52,6 +59,9 @@ export default function Board(props) {
 
     // checks the case of the given char.
     const checkCase = (char) => {
+        if (char == null) {
+            return 'Neither'
+        }
         const code = char.charCodeAt(0);
         if (code >= 65 && code <= 90) {
             return 'Uppercase';
@@ -216,27 +226,32 @@ export default function Board(props) {
     //random as of now
     const makeBlackMove = () => {
         let madeMove = false;
+        let checkedPieces = [];
         while (!madeMove) {
             let blkSquares = [];
             for (let i = 1; i <= 64; i++) {
-                if (containsColorPiece(i, false)) blkSquares.push(i);
+                if (containsColorPiece(i, false) && !checkedPieces.includes(i)) blkSquares.push(i);
             }
+            console.log(blkSquares);
             let origin = blkSquares[Math.floor(Math.random() * blkSquares.length)];
             let piece = boardState[origin - 1];
             let moves = getMoves(piece, origin, false);
-            console.log("origin: " + origin);
-            console.log("piece: " + piece);
-            console.log("moves: " + moves);
             if (moves.length > 0) {
                 let target = moves[Math.floor(Math.random() * moves.length)];
                 blackPerformMove(origin, target);
-                console.log("performed move");
                 madeMove = true;
+            } else {
+                checkedPieces.push(origin);
+                if (checkedPieces.length >= blkSquares.length) {
+                    console.log("I give up!");
+                    madeMove = true;
+                }
             }
         }
     }
 
     const squareClicked = (id) => {
+        setMoved(false);
         setSelectedSquare(prevSelectedSquare => {
 
             // if we select the selected square, deselect
@@ -260,8 +275,7 @@ export default function Board(props) {
                 setHighlightedSquares([]);
                 return 0;
             }
-        });
-        setMoved(false);
+        }); 
     }
 
     const blackPerformMove = (sourceid, targetid) => {
@@ -274,10 +288,14 @@ export default function Board(props) {
     }
 
     const performMove = (sourceid, targetid) => {
-        blackPerformMove(sourceid, targetid);
+        setBoardState(prevBoardState => {
+            const newBoardState = [...prevBoardState];
+            newBoardState[targetid - 1] = newBoardState[sourceid - 1];
+            newBoardState[sourceid - 1] = " ";
+            return newBoardState;
+        });
         setMoved(true);
         setValidSelection(false);
-        makeBlackMove();
     }
 
     
