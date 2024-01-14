@@ -213,6 +213,29 @@ export default function Board(props) {
         }
     }
 
+    //random as of now
+    const makeBlackMove = () => {
+        let madeMove = false;
+        while (!madeMove) {
+            let blkSquares = [];
+            for (let i = 1; i <= 64; i++) {
+                if (containsColorPiece(i, false)) blkSquares.push(i);
+            }
+            let origin = blkSquares[Math.floor(Math.random() * blkSquares.length)];
+            let piece = boardState[origin - 1];
+            let moves = getMoves(piece, origin, false);
+            console.log("origin: " + origin);
+            console.log("piece: " + piece);
+            console.log("moves: " + moves);
+            if (moves.length > 0) {
+                let target = moves[Math.floor(Math.random() * moves.length)];
+                blackPerformMove(origin, target);
+                console.log("performed move");
+                madeMove = true;
+            }
+        }
+    }
+
     const squareClicked = (id) => {
         setSelectedSquare(prevSelectedSquare => {
 
@@ -241,16 +264,23 @@ export default function Board(props) {
         setMoved(false);
     }
 
-    const performMove = (sourceid, targetid) => {
+    const blackPerformMove = (sourceid, targetid) => {
         setBoardState(prevBoardState => {
             const newBoardState = [...prevBoardState];
             newBoardState[targetid - 1] = newBoardState[sourceid - 1];
             newBoardState[sourceid - 1] = " ";
             return newBoardState;
         });
+    }
+
+    const performMove = (sourceid, targetid) => {
+        blackPerformMove(sourceid, targetid);
         setMoved(true);
         setValidSelection(false);
+        makeBlackMove();
     }
+
+    
 
     return (
         <div>
