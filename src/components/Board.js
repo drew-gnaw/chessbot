@@ -89,8 +89,22 @@ export default function Board(props) {
             if ((id % 8 !== 0) && containsColorPiece(id - 7, false)) {
                 moves.push(id - 7);
             }
+            if (49 <= id && id <= 56 && !containsColorPiece(id - 16, true) && !containsColorPiece(id - 16, false) && moves.includes(id - 8)) {
+                moves.push(id - 16);
+            }
         } else {
-            // blacks moves go here
+            if (id + 8 <= 64 && !containsColorPiece(id + 8, true) && !containsColorPiece(id + 8, false)) {
+                moves.push(id + 8);
+            }
+            if ((id % 8 !== 1) && containsColorPiece(id + 7, true)) {
+                moves.push(id + 7);
+            }
+            if ((id % 8 !== 0) && containsColorPiece(id + 9, true)) {
+                moves.push(id + 9);
+            }
+            if (9 <= id && id <= 16 && !containsColorPiece(id + 16, true) && !containsColorPiece(id + 16, false) && moves.includes(id + 8)) {
+                moves.push(id + 16);
+            }
         }
         return moves;
     }
