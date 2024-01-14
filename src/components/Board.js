@@ -287,12 +287,7 @@ export default function Board(props) {
     }
 
     const performMove = (sourceid, targetid) => {
-        setBoardState(prevBoardState => {
-            const newBoardState = [...prevBoardState];
-            newBoardState[targetid - 1] = newBoardState[sourceid - 1];
-            newBoardState[sourceid - 1] = " ";
-            return newBoardState;
-        });
+        blackPerformMove(sourceid, targetid);
         setMoved(true);
         setValidSelection(false);
     }
@@ -301,7 +296,7 @@ export default function Board(props) {
 
     return (
         <div>
-            {boardState.slice(0, 64).map((_, i) => (
+            {boardState.map((_, i) => (
                 <div key={i} style={{display: 'flex'}}>
                     {boardState.slice(i*8, i*8+8).map((piece, j) => (
                        <Square id = {j + 1 + i*8} 
