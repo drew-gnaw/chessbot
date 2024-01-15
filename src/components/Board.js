@@ -54,7 +54,29 @@ export default function Board(props) {
         // eslint-disable-next-line
     }, [boardState]);
 
-    
+    const getFEN = () => {
+        let fen = "";
+        let emptyCount = 0;
+        for (let i = 0; i < boardState.length; i++) {
+            if (i % 8 === 0 && i !== 0) {
+                if (emptyCount !== 0) {
+                    fen += emptyCount.toString();
+                    emptyCount = 0;
+                }
+                fen += "/";
+            }
+            if (boardState[i] === " ") {
+                emptyCount++;
+            } else {
+                if (emptyCount !== 0) {
+                    fen += emptyCount.toString();
+                    emptyCount = 0;
+                }
+                fen += boardState[i];
+            }
+        }
+        return fen;
+    }
     
     const strToPng = (s) => {
         return pngMap[s];
@@ -99,6 +121,7 @@ export default function Board(props) {
         for (let i = 0; i < oppSquares.length; i++) {
             possibleMoves = possibleMoves.concat(getMoves(oppSquares[i], !white, true));
         }
+        console.log(possibleMoves);
         for (let i = 0; i < possibleMoves.length; i++) {
             if (bdState[possibleMoves[i] - 1] === (white? 'K' : 'k')) return true;
         }
@@ -288,7 +311,6 @@ export default function Board(props) {
                     newBoardState[moves[i] - 1] = newBoardState[id - 1];
                     newBoardState[id - 1] = " ";
                     if (inCheck(newBoardState, true)) {
-                        console.log("well fuck");
                         moves.splice(i, 1);
                         i--;
                     }
@@ -322,7 +344,7 @@ export default function Board(props) {
         setValidSelection(false);
     }
 
-    
+    console.log(getFEN());
 
     return (
         <div>
