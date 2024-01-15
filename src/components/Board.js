@@ -51,7 +51,10 @@ export default function Board(props) {
             makeBlackMove();
             setMoved(false);
         }
-    }, [boardState]); // Only re-run if 'state' changes
+        // eslint-disable-next-line
+    }, [boardState]);
+
+    
     
     const strToPng = (s) => {
         return pngMap[s];
@@ -84,6 +87,22 @@ export default function Board(props) {
     // returns true if the square is light
     const isLightSquare = (id) => {
         return ((Math.floor((id - 1) / 8)) + (id % 8)) % 2 !== 0;
+    }
+
+    // returns true if white/black is in check, false otherwise. bdstate is an array of length 64
+    const inCheck = (bdState, white) => {
+        let possibleMoves = [];
+        let oppSquares = [];
+        for (let i = 1; i <= 64; i++) {
+            if (containsColorPiece(i, !white)) oppSquares.push(i);
+        }
+        for (let i = 0; i < oppSquares.length; i++) {
+            possibleMoves = possibleMoves.concat(getMoves(oppSquares[i], !white));
+        }
+        for (let i = 0; i < possibleMoves.length; i++) {
+            if (bdState[possibleMoves[i] - 1].toLowerCase() === 'k') return true;
+        }
+        return false;
     }
 
     // returns the ids of squares that are valid pawn moves from the given id.
@@ -204,7 +223,8 @@ export default function Board(props) {
     }
 
     // returns the ids of squares that a piece on id of given color could move to.
-    const getMoves = (piece, id, white) => {
+    const getMoves = (id, white) => {
+        const piece = boardState[id - 1].toLowerCase();
         switch (piece) {
             case 'p':
                 return getPawnMoves(id, white);
@@ -233,8 +253,7 @@ export default function Board(props) {
                 if (containsColorPiece(i, false) && !checkedPieces.includes(i)) blkSquares.push(i);
             }
             let origin = blkSquares[Math.floor(Math.random() * blkSquares.length)];
-            let piece = boardState[origin - 1];
-            let moves = getMoves(piece, origin, false);
+            let moves = getMoves(origin, false);
             if (moves.length > 0) {
                 let target = moves[Math.floor(Math.random() * moves.length)];
                 blackPerformMove(origin, target);
@@ -263,7 +282,7 @@ export default function Board(props) {
             } else if (containsColorPiece(id, true)) {
                 setValidSelection(true);
                 console.log(boardState[id - 1].toString().toLowerCase());
-                setHighlightedSquares(getMoves(boardState[id - 1].toString().toLowerCase(), id, true));
+                setHighlightedSquares(getMoves(id, true));
                 return id;
 
             } else {
@@ -290,6 +309,12 @@ export default function Board(props) {
         blackPerformMove(sourceid, targetid);
         setMoved(true);
         setValidSelection(false);
+        if (inCheck(boardState, true)) {
+            console.log("somebody in trouuble");
+        }
+        if (inCheck(boardState, false)) {
+            console.log("the other guy in trouuble");
+        }
     }
 
     
